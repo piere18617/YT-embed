@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>YouTube Embed Tester</title>
+</head>
+
+<body>
+    <h1>YouTube Embed Tester</h1>
+
+    <input
+        id="videoInput"
+        type="text"
+        placeholder="Enter YouTube video ID or URL"
+        style="width: 400px; padding: 8px;"
+    >
+
+    <button onclick="loadVideo()">Load Video</button>
+
+    <br><br>
+
+    <iframe
+        id="player"
+        width="800"
+        height="450"
+        src=""
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+    </iframe>
+
+    <script>
+        function getVideoId(input) {
+            input = input.trim();
+
+            // If they entered just the video ID
+            if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+                return input;
+            }
+
+            // If they entered a YouTube URL
+            try {
+                const url = new URL(input);
+
+                if (url.hostname.includes("youtube.com")) {
+                    if (url.pathname === "/watch") {
+                        return url.searchParams.get("v");
+                    }
+
+                    if (url.pathname.startsWith("/embed/")) {
+                        return url.pathname.split("/embed/")[1].split("/")[0];
+                    }
+
+                    if (url.pathname.startsWith("/shorts/")) {
+                        return url.pathname.split("/shorts/")[1].split("/")[0];
+                    }
+                }
+
+                if (url.hostname === "youtu.be") {
+                    return url.pathname.substring(1).split("/")[0];
+                }
+            } catch {
+                return null;
+            }
+
+            return null;
+        }
+
+        function loadVideo() {
+            const input = document.getElementById("videoInput").value;
+            const videoId = getVideoId(input);
+
+            if (!videoId) {
+                alert("Couldn't find a valid YouTube video ID.");
+                return;
+            }
+
+            document.getElementById("player").src =
+                "https://www.youtube-nocookie.com/embed/" + videoId;
+        }
+
+        document.getElementById("videoInput").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                loadVideo();
+            }
+        });
+    </script>
+</body>
+</html>
